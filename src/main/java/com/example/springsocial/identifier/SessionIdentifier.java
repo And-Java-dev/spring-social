@@ -1,0 +1,35 @@
+package com.example.springsocial.identifier;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.social.UserIdSource;
+import org.springframework.social.config.annotation.SocialConfigurerAdapter;
+import org.springframework.social.connect.web.SessionUserIdSource;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+
+import java.util.UUID;
+
+@Configuration
+public class SessionIdentifier extends SocialConfigurerAdapter {
+
+    @Override
+    public UserIdSource getUserIdSource() {
+        return  new SessionUserIdSource();
+    }
+
+    private static final class SessionIdSource implements UserIdSource {
+
+        @Override
+        public String getUserId() {
+            RequestAttributes request = RequestContextHolder.currentRequestAttributes();
+            String uuid = (String) request.getAttribute("_socialUserUUID", RequestAttributes.SCOPE_SESSION);
+            if (uuid == null){
+                uuid = UUID.randomUUID().toString();
+                request.setAttribute("_socialUserUUID",uuid,RequestAttributes.SCOPE_SESSION);
+            }
+
+
+            return uuid;
+        }
+    }
+}
